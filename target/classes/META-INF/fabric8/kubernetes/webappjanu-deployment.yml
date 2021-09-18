@@ -1,0 +1,56 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+    fabric8.io/metrics-path: dashboard/file/camel-routes.json/?var-project=webappjanu&var-version=1.0-SNAPSHOT
+  labels:
+    provider: fabric8
+    project: webappjanu
+    version: 1.0-SNAPSHOT
+    group: com.janu
+  name: webappjanu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      project: webappjanu
+      provider: fabric8
+      group: com.janu
+  template:
+    metadata:
+      annotations:
+        fabric8.io/metrics-path: dashboard/file/camel-routes.json/?var-project=webappjanu&var-version=1.0-SNAPSHOT
+      labels:
+        provider: fabric8
+        project: webappjanu
+        version: 1.0-SNAPSHOT
+        group: com.janu
+    spec:
+      containers:
+      - env:
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: janu/webappjanu:snapshot-210918-115453-0370
+        imagePullPolicy: IfNotPresent
+        name: funktor
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9779
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8778
+          name: jolokia
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 180
+        securityContext:
+          privileged: false
