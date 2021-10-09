@@ -12,25 +12,16 @@ pipeline{
         stage("Mvn Build") {
             steps{
               sh "mvn clean package"
-              sh "mv target/*.war target/myweb.war"
+              
             }
         }
-        stage("Deployement") {
+        stage("Deployee") {
             steps{
-              sshagent(['e778a63e-4d5d-4e8f-bfd2-f20aa309c9de']) {
-              sh """ 
-                    ssh -o StrictHostKeyChecking=no target/myweb.war ubuntu@172.31.44.238:/etc/tomcat8/webapps/
-                    
-                    ssh ubuntu@172.31.44.238 /etc/tomcat8/bin/shutdown.sh
-                    
-                    ssh ubuntu@172.31.44.238 /etc/tomcat8/bin/startup.sh
+              deploy adapters: [tomcat8(credentialsId: 'tomcat8', path: '', url: 'http://172.31.32.250:8080')], contextPath: 'djfahk', war: '**/*.war'
               
-              
-              """
-    
-                 }
             }
         }
-    }
+        
+        }
    
 }
