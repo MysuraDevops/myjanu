@@ -12,12 +12,20 @@ pipeline{
         stage("Mvn Build") {
             steps{
               sh "mvn clean package"
-              
+              sh "target/*.war target/myweb.war"
             }
         }
         stage("Deployee") {
             steps{
-              deploy adapters: [tomcat8(credentialsId: 'tomcat8', path: '', url: 'http://172.31.32.250:8080')], contextPath: 'djfahk', war: '**/*.war'
+              sshagent(['e778a63e-4d5d-4e8f-bfd2-f20aa309c9de']) {
+              sh """ 
+                    scp -o StrictHostKeyChecking=no target/myweb.war ubuntu@172.31.32.250:/etc/tomcat8/webapps/
+                    ssh ubuntu@172.31.32.250 /etc/tomcat8/binshutdown.sh
+                    ssh ubuntu@172.31.32.250 /etc/tomcat8/startup.sh
+              
+              
+              """
+             }
               
             }
         }
